@@ -15,4 +15,17 @@ model Student {
   otp       String?
   isVoted   Boolean @default(false)
   createdAt DateTime @default(now())
+
+  votedCasisId String? @unique
+  votedCasis   Casis? @relation(fields: [votedCasisId], references: [id])
+}
+
+model Casis {
+  id        String  @id @default(uuid())
+  teamName  String
+  leader    String
+  coLeader  String
+  createdAt DateTime @default(now())
+
+  votedBy Student?
 }
