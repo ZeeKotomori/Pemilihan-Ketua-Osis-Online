@@ -13,6 +13,7 @@ model Student {
   email     String  @unique
   fullName  String
   otp       String?
+  role      Role           @default(u)
   isVoted   Boolean @default(false)
   createdAt DateTime @default(now())
 
@@ -28,4 +29,9 @@ model Casis {
   createdAt DateTime @default(now())
 
   votedBy Student?
+}
+
+enum Role {
+  a
+  u
 }
