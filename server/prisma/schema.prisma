@@ -25,7 +25,9 @@ model Casis {
   id        String  @id @default(uuid())
   teamName  String
   leader    String
+  leaderPhoto String?
   coLeader  String
+  coLeaderPhoto String?
   createdAt DateTime @default(now())
 
   votedBy Student?
