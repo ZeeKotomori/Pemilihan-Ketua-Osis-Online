@@ -28,9 +28,9 @@ export const getDataByTeamName = async (req, res) => {
 }
 
 export const createCasis = async (req, res) => {
-    const { teamName, leader, coLeader } = req.body
+    const { teamName, leader, coLeader, proker } = req.body
 
-    if (!teamName || !leader || !coLeader) return res.status(400).send("please fill all form")
+    if (!teamName || !leader || !coLeader || !proker) return res.status(400).send("please fill all form")
     try {
         const leaderPhotoPath = req.files['leaderPhoto'] ? `public/uploads/${req.files['leaderPhoto'][0].filename}` : null;
         const coLeaderPhotoPath = req.files['coLeaderPhoto'] ? `public/uploads/${req.files['coLeaderPhoto'][0].filename}` : null;
@@ -42,6 +42,7 @@ export const createCasis = async (req, res) => {
                 coLeader,
                 leaderPhoto: leaderPhotoPath,
                 coLeaderPhoto: coLeaderPhotoPath,
+                proker : proker
             },
         });
 
@@ -56,7 +57,7 @@ export const updateCasis = async (req, res) => {
     const { id } = req.params;
     const { teamName, leader, coLeader } = req.body;
 
-    if (!id || !teamName || !leader || !coLeader) return res.status(400).send("please fill all form");
+    if (!id || !teamName || !leader || !coLeader || !proker) return res.status(400).send("please fill all form");
 
     try {
         const leaderPhotoPath = req.files['leaderPhoto'] ? `public/uploads/${req.files['leaderPhoto'][0].filename}` : null;
@@ -70,6 +71,7 @@ export const updateCasis = async (req, res) => {
                 coLeader,
                 leaderPhoto: leaderPhotoPath,
                 coLeaderPhoto: coLeaderPhotoPath,
+                proker : proker
             },
         });
 
