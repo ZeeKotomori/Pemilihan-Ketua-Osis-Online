@@ -59,7 +59,7 @@ export const login = async (req, res) => {
             return res.status(400).send("Invalid NISN or email.");
         }
 
-        const token = jwt.sign({ id: user.email, nisn : user.nisn}, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ email: user.email, nisn : user.nisn}, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         return res.status(200).send({ msg: "Login successful.", token });
     } catch (error) {
@@ -67,6 +67,7 @@ export const login = async (req, res) => {
         return res.status(500).send("Internal Server Error");
     }
 }
+
 export const logout = (req, res) => {
     return res.status(200).send({ msg: "Logout successful." });
 }
