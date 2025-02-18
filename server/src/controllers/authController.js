@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export const register = async (req, res) => {
     const { nisn, email, fullName } = req.body;
-    if (!nisn || !email || !fullName) return res.status(404).send("please fill the form");
+    if (!nisn || !email || !fullName) return res.status(400).send("please fill the form");
 
     try {
     const existingUser = await prisma.student.findFirst({
@@ -18,7 +18,7 @@ export const register = async (req, res) => {
         return res.status(400).send("You already using this email or NISN. If you don't recognize this, please contact the committee.");
     }
 
-    const email = crypto.randomInt(100000, 999999).toString();
+    const emailCode = crypto.randomInt(100000, 999999).toString();
 
     await prisma.student.create({
         data: { nisn, email, fullName, email },
@@ -36,7 +36,7 @@ export const register = async (req, res) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "email CODE FOR VOTING",
-        text: `Your email code for voting is: ${email}, make sure you don't give it to everyone, if I don't ask for this email, contact the committee`,
+        text: `Your email code for voting is: ${emailCode}, make sure you don't give it to everyone, if I don't ask for this email, contact the committee`,
     });
 
         return res.status(200).send({ msg: "email sent to email." });
@@ -59,7 +59,7 @@ export const login = async (req, res) => {
             return res.status(400).send("Invalid NISN or email.");
         }
 
-        const token = jwt.sign({ id: user.email, nisn : user.nisn}, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign({ email: user.email, nisn : user.nisn}, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         return res.status(200).send({ msg: "Login successful.", token });
     } catch (error) {
@@ -67,6 +67,7 @@ export const login = async (req, res) => {
         return res.status(500).send("Internal Server Error");
     }
 }
+
 export const logout = (req, res) => {
     return res.status(200).send({ msg: "Logout successful." });
 }
