@@ -19,7 +19,7 @@ router.post(
 );
 
 router.patch(
-    "/update-casis",
+    "/update-casis/:id",
     upload.fields([
         { name: "leaderPhoto", maxCount: 1 },
         { name: "coLeaderPhoto", maxCount: 1 },
@@ -28,6 +28,6 @@ router.patch(
     updateCasis
 );
 
-router.delete("/delete", deleteCasis)
+router.delete("/delete/:id", deleteCasis)
 
 export default router;
