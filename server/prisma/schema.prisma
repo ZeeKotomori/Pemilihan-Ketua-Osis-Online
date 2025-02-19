@@ -13,35 +13,27 @@ model Student {
   email     String  @unique
   fullName  String
   otp       String?
-  role      Role   @default(u)
   isVoted   Boolean @default(false)
   createdAt DateTime @default(now())
 
   votedCasisId String?  
   votedCasis   Casis?  @relation(fields: [votedCasisId], references: [id])
+
+  ledCasis     Casis[] @relation("LeaderRelation")
+  coLedCasis   Casis[] @relation("CoLeaderRelation")
 }
 
 model Casis {
   id            String   @id @default(uuid())
   teamName      String
-  leader        String
+  leaderId      String?  @unique
+  leader        Student? @relation("LeaderRelation", fields: [leaderId], references: [id])
   leaderPhoto   String?
-  coLeader      String
+  coLeaderId    String?  @unique
+  coLeader      Student? @relation("CoLeaderRelation", fields: [coLeaderId], references: [id])
   coLeaderPhoto String?
   proker        String?
   createdAt     DateTime @default(now())
 
   votedBy       Student[]
-}
-
-model Admin {
-  id        String  @id @default(uuid())
-  email     String  @unique
-  password  String
-  createdAt DateTime @default(now())
-}
-
-enum Role {
-  a // Admin
-  u // User (Student)
 }
