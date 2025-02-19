@@ -21,7 +21,11 @@ export const register = async (req, res) => {
     const emailCode = crypto.randomInt(100000, 999999).toString();
 
     await prisma.student.create({
-        data: { nisn, email, fullName, email },
+        data: { 
+            nisn : nisn,
+            email : email,
+            fullName : fullName,
+            otp : emailCode },
     });
 
     const transporter = nodemailer.createTransport({
