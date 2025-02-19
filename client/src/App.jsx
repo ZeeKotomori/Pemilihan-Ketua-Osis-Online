@@ -15,7 +15,7 @@ function App() {
         <Route path='/login' element={<PublicRoute><Login /></PublicRoute>} />
         <Route path='/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path='/add' element={<PrivateRoute><AddData /></PrivateRoute>} />
-        <Route path='/edit' element={<PrivateRoute><EditData /></PrivateRoute>} />
+        <Route path='/edit/:teamNameInit' element={<PrivateRoute><EditData /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   )
