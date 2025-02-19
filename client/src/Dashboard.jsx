@@ -4,10 +4,34 @@ import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import Row from 'react-bootstrap/Row';
 import { useNavigate } from 'react-router-dom';
-
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export const Dashboard = () => {
+  const [calon, setCalon] = useState([])
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getCalon()
+  }, [])
+
+  const getCalon = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/v1/');
+      setCalon(response.data.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const deleteData = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/v1/delete/${id}`)
+      getCalon()
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const Logout = async () => {
     localStorage.removeItem('token');
@@ -31,31 +55,33 @@ export const Dashboard = () => {
           <Table hover responsive className='mt-3'>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Nama</th>
-                <th>Kelas</th>
+                <th>Nama Tim</th>
+                <th>Caketos</th>
+                <th>Cawaketos</th>
                 <th>Program kerja</th>
                 <th colSpan={3}>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Mark Kadal</td>
-                <td>XII RPK 2</td>
-                <td>Makan siang gratis, Makan sore gratis, sarapan gratis</td>
+              { calon.map((calon, index) => (
+              <tr key={index}>
+                <td>{calon.teamName}</td>
+                <td>{calon.leader}</td>
+                <td>{ calon.coLeader }</td>
+                <td>{ calon.proker }</td>
                 <td className='align-start'>
-                  <Button className='w-100'>Detail</Button>
+                  <Button className='w-100'>Foto</Button>
                 </td>
                 <td className='align-start'>
-                  <Link to='/edit' className='text-decoration-none text-reset'>
+                  <Link to={`/edit/${calon.teamName}`} className='text-decoration-none text-reset'>
                     <Button variant='warning' className='w-100'>Edit</Button>
                   </Link>
                 </td>
                 <td className='align-start'>
-                  <Button variant='danger' className='w-100'>Hapus</Button>
+                  <Button variant='danger' className='w-100' onClick={() => deleteData(calon.id)}>Hapus</Button>
                 </td>
               </tr>
+              ))}
             </tbody>
           </Table>
         </Card.Body>
