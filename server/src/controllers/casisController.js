@@ -55,7 +55,7 @@ export const createCasis = async (req, res) => {
 
 export const updateCasis = async (req, res) => {
     const { id } = req.params;
-    const { teamName, leader, coLeader } = req.body;
+    const { teamName, leader, coLeader, proker } = req.body;
 
     if (!id || !teamName || !leader || !coLeader || !proker) return res.status(400).send("please fill all form");
 
@@ -64,7 +64,7 @@ export const updateCasis = async (req, res) => {
         const coLeaderPhotoPath = req.files['coLeaderPhoto'] ? `public/uploads/${req.files['coLeaderPhoto'][0].filename}` : null;
 
         const updatedCasis = await prisma.casis.update({
-            where: { id: parseInt(id) },
+            where: { id: id },
             data: {
                 teamName,
                 leader,
@@ -89,7 +89,7 @@ export const deleteCasis = async (req, res) => {
 
     try {
         await prisma.casis.delete({
-            where: { id: parseInt(id) },
+            where: { id: id },
         });
 
         return res.status(200).send({ msg: "Casis Has Been Deleted" });
