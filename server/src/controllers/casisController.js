@@ -3,12 +3,18 @@ const prisma = new PrismaClient();
 
 export const getAllData = async (req, res) => {
     try {
-        const data = await prisma.casis.findMany();
-        return res.status(200).json({ count: data.length, data }); 
+        const data = await prisma.casis.findMany({
+            include: {
+                leader: true,
+                coLeader: true
+            }
+        });
+
+        return res.status(200).json({ count: data.length, data });
     } catch (error) {
-        return res.status(500).json({ message: "Internal Server Error" }); 
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const getDataByTeamName = async (req, res) => {
     const { teamName } = req.params;
@@ -17,84 +23,116 @@ export const getDataByTeamName = async (req, res) => {
 
     try {
         const data = await prisma.casis.findFirst({
-            where: { teamName : teamName}
+            where: { teamName },
+            include: {
+                leader: true,
+                coLeader: true
+            }
         });
 
         return res.status(200).json({ data });
     } catch (error) {
-        console.log(error)
+        console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const createCasis = async (req, res) => {
-    const { teamName, leader, coLeader, proker } = req.body
+    const { teamName, leaderEmail, coLeaderEmail, proker } = req.body;
 
-    if (!teamName || !leader || !coLeader || !proker) return res.status(400).send("please fill all form")
+    if (!teamName || !leaderEmail || !coLeaderEmail || !proker) {
+        return res.status(400).json({ message: "Please fill all required fields" });
+    }
+
     try {
-        const leaderPhotoPath = req.files['leaderPhoto'] ? `public/uploads/${req.files['leaderPhoto'][0].filename}` : null;
-        const coLeaderPhotoPath = req.files['coLeaderPhoto'] ? `public/uploads/${req.files['coLeaderPhoto'][0].filename}` : null;
+        const leader = await prisma.student.findUnique({ where: { email: leaderEmail } });
+        const coLeader = await prisma.student.findUnique({ where: { email: coLeaderEmail } });
+
+        if (!leader || !coLeader) {
+            return res.status(404).json({ message: "Leader or Co-Leader not found" });
+        }
+
+        const leaderPhotoPath = req.files?.leaderPhoto ? `public/uploads/${req.files.leaderPhoto[0].filename}` : null;
+        const coLeaderPhotoPath = req.files?.coLeaderPhoto ? `public/uploads/${req.files.coLeaderPhoto[0].filename}` : null;
 
         const newCasis = await prisma.casis.create({
             data: {
                 teamName,
-                leader,
-                coLeader,
+                leaderId: leader.id,
+                coLeaderId: coLeader.id,
                 leaderPhoto: leaderPhotoPath,
                 coLeaderPhoto: coLeaderPhotoPath,
-                proker : proker
+                proker
             },
         });
 
-        return res.status(201).send({ msg : "Casis Has Been Created", newCasis });
+        return res.status(201).json({ message: "Casis has been created", newCasis });
     } catch (error) {
-        console.log(error);
-        return res.status(500).send("Internal Server Error");
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const updateCasis = async (req, res) => {
     const { id } = req.params;
-    const { teamName, leader, coLeader, proker } = req.body;
+    const { teamName, leaderEmail, coLeaderEmail, proker } = req.body;
 
-    if (!id || !teamName || !leader || !coLeader || !proker) return res.status(400).send("please fill all form");
+    if (!id || !teamName || !leaderEmail || !coLeaderEmail || !proker) {
+        return res.status(400).json({ message: "Please fill all required fields" });
+    }
 
     try {
-        const leaderPhotoPath = req.files['leaderPhoto'] ? `public/uploads/${req.files['leaderPhoto'][0].filename}` : null;
-        const coLeaderPhotoPath = req.files['coLeaderPhoto'] ? `public/uploads/${req.files['coLeaderPhoto'][0].filename}` : null;
+        const leader = await prisma.student.findUnique({ where: { email: leaderEmail } });
+        const coLeader = await prisma.student.findUnique({ where: { email: coLeaderEmail } });
+
+        if (!leader || !coLeader) {
+            return res.status(404).json({ message: "Leader or Co-Leader not found" });
+        }
+
+        const existingCasis = await prisma.casis.findUnique({ where: { id } });
+        if (!existingCasis) return res.status(404).json({ message: "Casis not found" });
+
+        const leaderPhotoPath = req.files?.leaderPhoto
+            ? `public/uploads/${req.files.leaderPhoto[0].filename}`
+            : existingCasis.leaderPhoto;
+
+        const coLeaderPhotoPath = req.files?.coLeaderPhoto
+            ? `public/uploads/${req.files.coLeaderPhoto[0].filename}`
+            : existingCasis.coLeaderPhoto;
 
         const updatedCasis = await prisma.casis.update({
-            where: { id: id },
+            where: { id },
             data: {
                 teamName,
-                leader,
-                coLeader,
+                leaderId: leader.id,
+                coLeaderId: coLeader.id,
                 leaderPhoto: leaderPhotoPath,
                 coLeaderPhoto: coLeaderPhotoPath,
-                proker : proker
+                proker
             },
         });
 
-        return res.status(200).send({ msg: "Casis Has Been Updated", updatedCasis });
+        return res.status(200).json({ message: "Casis has been updated", updatedCasis });
     } catch (error) {
-        console.log(error);
-        return res.status(500).send("Internal Server Error");
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
 export const deleteCasis = async (req, res) => {
     const { id } = req.params;
 
-    if (!id) return res.status(400).send("id must be provided");
+    if (!id) return res.status(400).json({ message: "ID must be provided" });
 
     try {
-        await prisma.casis.delete({
-            where: { id: id },
-        });
+        const casis = await prisma.casis.findUnique({ where: { id } });
+        if (!casis) return res.status(404).json({ message: "Casis not found" });
 
-        return res.status(200).send({ msg: "Casis Has Been Deleted" });
+        await prisma.casis.delete({ where: { id } });
+
+        return res.status(200).json({ message: "Casis has been deleted" });
     } catch (error) {
-        console.log(error);
-        return res.status(500).send("Internal Server Error");
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
