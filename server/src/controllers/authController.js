@@ -33,7 +33,7 @@ export const register = async (req, res) => {
             },
         });
 
-        return res.status(200).send({ msg: "email sent to email." });
+        return res.status(200).send({ msg: user });
     } catch (error) {
         console.log(error);
         return res.status(500).send("Internal Server Error");
@@ -45,15 +45,16 @@ export const login = async (req, res) => {
     if ( !email || !password) return res.status(404).send("please fill the form");
 
     try {
-        const user = await prisma.user.findFirst({
-            where: { email , password }
+        const user = await prisma.user.findUnique({
+            where: { email }
         });
+
+        if (!user) return res.status(400).send("Invalid Password or email.");
 
         const isPasswordValid = await bcyrpt.compare(password, user.password);
 
         if (!isPasswordValid) return res.status(400).send("Invalid Password or email.");
 
-        if (!user) return res.status(400).send("Invalid Password or email.");
 
         const token = jwt.sign({ email: user.email, role : user.role}, process.env.JWT_SECRET, { expiresIn: '1d' });
 
