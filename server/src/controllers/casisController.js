@@ -45,8 +45,8 @@ export const createCasis = async (req, res) => {
     }
 
     try {
-        const leader = await prisma.student.findUnique({ where: { email: leaderEmail } });
-        const coLeader = await prisma.student.findUnique({ where: { email: coLeaderEmail } });
+        const leader = await prisma.user.findUnique({ where: { email: leaderEmail } });
+        const coLeader = await prisma.user.findUnique({ where: { email: coLeaderEmail } });
 
         if (!leader || !coLeader) {
             return res.status(404).json({ message: "Leader or Co-Leader not found" });
@@ -82,8 +82,8 @@ export const updateCasis = async (req, res) => {
     }
 
     try {
-        const leader = await prisma.student.findUnique({ where: { email: leaderEmail } });
-        const coLeader = await prisma.student.findUnique({ where: { email: coLeaderEmail } });
+        const leader = await prisma.user.findUnique({ where: { email: leaderEmail } });
+        const coLeader = await prisma.user.findUnique({ where: { email: coLeaderEmail } });
 
         if (!leader || !coLeader) {
             return res.status(404).json({ message: "Leader or Co-Leader not found" });
