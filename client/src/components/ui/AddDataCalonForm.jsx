@@ -1,42 +1,21 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { Link, useNavigate, useParams } from 'react-router-dom';
 import Row from 'react-bootstrap/esm/Row';
 import Col from 'react-bootstrap/esm/Col';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-export const EditDataForm = () => {
-  const [id, setId] = useState('')
+export const AddDataCalonForm = () => {
   const [teamName, setTeamName] = useState('')
   const [leader, setLeader] = useState('')
-  const [leaderEmail, setLeaderEmail] = useState('')
   const [leaderPhoto, setLeaderPhoto] = useState('')
   const [coLeader, setCoLeader] = useState('')
-  const [coLeaderEmail, setCoLeaderEmail] = useState('')
   const [coLeaderPhoto, setCoLeaderPhoto] = useState('')
   const [proker, setProker] = useState('')
   const navigate = useNavigate()
-  const { teamNameInit } = useParams();
 
-  useEffect(() => {
-    getCalon()
-  }, [])
-  
-  const getCalon = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/v1/team/${teamNameInit}`);
-      setTeamName(response.data.data.teamName);
-      setLeader(response.data.data.leader.fullName);
-      setCoLeader(response.data.data.coLeader.fullName);
-      setProker(response.data.data.proker);
-      setId(response.data.data.id)
-    } catch (error) {
-      console.error(error);
-    }
-  }  
-
-  const EditData = async (e) => {
+  const AddData = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     const token = localStorage.getItem('token')
@@ -48,25 +27,24 @@ export const EditDataForm = () => {
     formData.append("coLeader", coLeader);
     formData.append("proker", proker);
     try {
-      await axios.patch(`http://localhost:5000/api/v1/update-casis/${id}`, formData, {
+      await axios.post("http://localhost:5000/api/v1/add-casis", formData, {
         headers: {
           "Content-type": "multipart/form-data",
-          "Authorization": `${token}`
+          "Authorization": `Bearer ${token}`
         },
       });
       navigate("/dashboard");
     } catch (error) {
-      console.log(error.response);
+      console.log(error);
     }
   };
 
   return (
-    <Form onSubmit={ EditData }>
+    <Form onSubmit={AddData}>
       <Form.Control
         type="text"
         placeholder="Nama Tim"
         className='mb-2 bg-white'
-        value={teamName}
         onChange={(e) => setTeamName(e.target.value)}
       />
 
@@ -83,7 +61,6 @@ export const EditDataForm = () => {
         type="text"
         placeholder="Ketua"
         className='mb-2 bg-white'
-        value={leader}
         onChange={(e) => setLeader(e.target.value)}
       />
 
@@ -100,7 +77,6 @@ export const EditDataForm = () => {
         type="text"
         placeholder="Wakil Ketua"
         className='mb-2 bg-white'
-        value={coLeader}
         onChange={(e) => setCoLeader(e.target.value)}
       />
 
@@ -108,8 +84,7 @@ export const EditDataForm = () => {
         as="textarea"
         placeholder="Program Kerja"
         style={{ height: '100px' }}
-        className='mb-2'
-        value={proker}
+        className='mb-2 bg-white'
         onChange={(e) => setProker(e.target.value)}
       />
 
@@ -123,7 +98,7 @@ export const EditDataForm = () => {
         </Col>
         <Col xs={6}>
           <Button variant="primary" type="submit" className='w-100'>
-            Ubah
+            Tambah
           </Button>
         </Col>
       </Row>

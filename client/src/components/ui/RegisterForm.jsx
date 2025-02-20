@@ -5,18 +5,22 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export const RegisterForm = () => {
-  const [nisn, setNisn] = useState('')
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
+  const [kelas, setKelas] = useState('')
+  const [password, setPassword] = useState('')
+  const [confPassword, setConfPassword] = useState('')
   const navigate = useNavigate()
 
   const Register = async (e) => {
     e.preventDefault();
     try {
       await axios.post('http://localhost:5000/api/v1/auth/register', {
-        nisn: nisn,
         email: email,
         fullName: fullName,
+        kelas: kelas,
+        password: password,
+        confirmPassword: confPassword
       });
       navigate("/login");
     } catch (error) {
@@ -29,13 +33,6 @@ export const RegisterForm = () => {
   return (
     <Form onSubmit={Register}>
       <Form.Control
-        type="text"
-        placeholder="NISN"
-        className='mb-2 bg-white'
-        onChange={(e) => setNisn(e.target.value)}
-      />
-
-      <Form.Control
         type="email"
         placeholder="Email"
         className='mb-2 bg-white'
@@ -44,9 +41,30 @@ export const RegisterForm = () => {
 
       <Form.Control
         type="text"
-        placeholder="Full Name"
+        placeholder="Nama Lengkap"
         className='mb-2 bg-white'
         onChange={(e) => setFullName(e.target.value)}
+      />
+
+      <Form.Control
+        type="text"
+        placeholder="Kelas"
+        className='mb-2 bg-white'
+        onChange={(e) => setKelas(e.target.value)}
+      />
+
+      <Form.Control
+        type="password"
+        placeholder="Password"
+        className='mb-2 bg-white'
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <Form.Control
+        type="password"
+        placeholder="Konfirmasi Password"
+        className='mb-2 bg-white'
+        onChange={(e) => setConfPassword(e.target.value)}
       />
 
       <Button variant="primary" type="submit" className='w-100'>
