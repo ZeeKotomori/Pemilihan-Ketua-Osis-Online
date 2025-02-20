@@ -4,13 +4,13 @@ const prisma = new PrismaClient();
 
 export const checkUserRole = (allowedRoles) => {
     return async (req, res, next) => {
-        const nisn = req.user.nisn;
+        const email = req.user.email;
 
-        if (!nisn) return res.status(401).send({ error: "Access denied. No token provided." });
+        if (!data) return res.status(401).send({ error: "Access denied. No token provided." });
 
         try {
             const user = await prisma.user.findUnique({
-                where: { nisn },
+                where: { email: email },
                 select: { role: true },
             });
 
