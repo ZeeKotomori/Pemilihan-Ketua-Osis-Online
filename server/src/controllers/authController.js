@@ -1,47 +1,37 @@
 import { PrismaClient } from "@prisma/client";
-import crypto from "crypto";
-import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
+import bcyrpt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 export const register = async (req, res) => {
-    const { nisn, email, fullName } = req.body;
-    if (!nisn || !email || !fullName) return res.status(400).send("please fill the form");
+    const { email, fullName, kelas, password, confirmPassword } = req.body;
+    if (!email || !fullName || !kelas || !password || !confirmPassword) return res.status(400).send("please fill the form");
 
     try {
-    const existingUser = await prisma.student.findFirst({
-        where: { OR: [{ nisn }, { email }] }
-    });
 
-    if (existingUser) {
-        return res.status(400).send("You already using this email or NISN. If you don't recognize this, please contact the committee.");
-    }
+        if (password !== confirmPassword) {
+            return res.status(400).send("Password and confirm password not match.");
+        }
 
-    const emailCode = crypto.randomInt(100000, 999999).toString();
+        const existingUser = await prisma.user.findFirst({
+            where: { email }
+        });
 
-    await prisma.student.create({
-        data: { 
-            nisn : nisn,
-            email : email,
-            fullName : fullName,
-            otp : emailCode },
-    });
+        if (existingUser) {
+            return res.status(400).send("You already using this email or NISN. If you don't recognize this, please contact the committee.");
+        }
 
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
+        const hashPassword = await bcyrpt.hash(password, 12);
 
-    await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "email CODE FOR VOTING",
-        text: `Your email code for voting is: ${emailCode}, make sure you don't give it to everyone, if I don't ask for this email, contact the committee`,
-    });
+        await prisma.user.create({
+            data: { 
+                email : email,
+                fullName : fullName,
+                password : hashPassword,
+                kelas : kelas,
+            },
+        });
 
         return res.status(200).send({ msg: "email sent to email." });
     } catch (error) {
@@ -51,19 +41,21 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    const { nisn, email } = req.body;
-    if (!nisn || !email) return res.status(404).send("please fill the form");
+    const { email, password } = req.body;
+    if ( !email || !password) return res.status(404).send("please fill the form");
 
     try {
-        const user = await prisma.student.findFirst({
-            where: { nisn, email }
+        const user = await prisma.user.findFirst({
+            where: { email , password }
         });
 
-        if (!user) {
-            return res.status(400).send("Invalid NISN or email.");
-        }
+        const isPasswordValid = await bcyrpt.compare(password, user.password);
 
-        const token = jwt.sign({ email: user.email, nisn : user.nisn}, process.env.JWT_SECRET, { expiresIn: '1d' });
+        if (!isPasswordValid) return res.status(400).send("Invalid Password or email.");
+
+        if (!user) return res.status(400).send("Invalid Password or email.");
+
+        const token = jwt.sign({ email: user.email, role : user.role}, process.env.JWT_SECRET, { expiresIn: '1d' });
 
         return res.status(200).send({ msg: "Login successful.", token });
     } catch (error) {
