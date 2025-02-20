@@ -7,33 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Student {
+model User {
   id        String  @id @default(uuid())
-  nisn      String  @unique
   email     String  @unique
+  password  String
   fullName  String
-  otp       String?
-  isVoted   Boolean @default(false)
+  kelas     String?
   createdAt DateTime @default(now())
+  role      Role    @default(u)
 
-  votedCasisId String?  
-  votedCasis   Casis?  @relation(fields: [votedCasisId], references: [id])
-
-  ledCasis     Casis[] @relation("LeaderRelation")
-  coLedCasis   Casis[] @relation("CoLeaderRelation")
+  ledCasis     Casis?  @relation("LeaderRelation")
+  coLedCasis   Casis?  @relation("CoLeaderRelation")
 }
 
 model Casis {
-  id            String   @id @default(uuid())
+  id            String  @id @default(uuid())
   teamName      String
-  leaderId      String?  @unique
-  leader        Student? @relation("LeaderRelation", fields: [leaderId], references: [id])
+  leaderId      String? @unique
+  leader        User?   @relation("LeaderRelation", fields: [leaderId], references: [id])
   leaderPhoto   String?
-  coLeaderId    String?  @unique
-  coLeader      Student? @relation("CoLeaderRelation", fields: [coLeaderId], references: [id])
+  coLeaderId    String? @unique
+  coLeader      User?   @relation("CoLeaderRelation", fields: [coLeaderId], references: [id])
   coLeaderPhoto String?
   proker        String?
   createdAt     DateTime @default(now())
-
-  votedBy       Student[]
+}
+  
+enum Role {
+  a
+  u
 }
