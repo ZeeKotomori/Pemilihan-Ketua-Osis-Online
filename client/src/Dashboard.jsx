@@ -17,10 +17,15 @@ export const Dashboard = () => {
 
   const getCalon = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/v1/');
+      const token = localStorage.getItem('token')
+      const response = await axios.get('http://localhost:5000/api/v1/', {
+        headers: {
+          "Authorization" : `Bearer ${token}`
+        },
+      });
       setCalon(response.data.data);
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 
@@ -46,9 +51,14 @@ export const Dashboard = () => {
       <Card className='m-3'>
         <Card.Body>
           <Row className='justify-content-end me-0'>
-            <Link to='/add' className='text-decoration-none text-reset' style={{ width: '6rem' }}>
-              <Button variant='outline-primary'>
-                Tambah
+            <Link to='/add-siswa' className='text-decoration-none text-reset' style={{ width: '10rem' }}>
+              <Button variant='outline-primary' className='w-100'>
+                Tambah Siswa
+              </Button>
+            </Link>
+            <Link to='/add-calon' className='text-decoration-none text-reset' style={{ width: '10rem' }}>
+              <Button variant='outline-primary' className='w-100'>
+                Tambah Calon
               </Button>
             </Link>
           </Row>
@@ -66,8 +76,8 @@ export const Dashboard = () => {
               { calon.map((calon, index) => (
               <tr key={index}>
                 <td>{calon.teamName}</td>
-                <td>{calon.leader}</td>
-                <td>{ calon.coLeader }</td>
+                <td>{calon.leader.fullName}</td>
+                <td>{ calon.coLeader.fullName }</td>
                 <td>{ calon.proker }</td>
                 <td className='align-start'>
                   <Button className='w-100'>Foto</Button>
