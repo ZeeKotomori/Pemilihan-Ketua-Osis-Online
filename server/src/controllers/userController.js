@@ -32,6 +32,16 @@ const prisma = new PrismaClient()
 //     }
 // };
 
+export const getAllUser = async (req, res) => {
+    try {
+        const users = await prisma.user.findMany();
+        return res.status(200).send(users);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send("Internal Server Error");
+    }
+};
+
 export const createUser = async (req, res) => {
     const { email, password, fullName, kelas } = req.body;
 
