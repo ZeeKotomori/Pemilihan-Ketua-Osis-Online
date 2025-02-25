@@ -3,6 +3,7 @@ import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import Row from 'react-bootstrap/Row';
+import Image from 'react-bootstrap/Image';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -17,10 +18,10 @@ export const Dashboard = () => {
 
   const getCalon = async () => {
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('token');
       const response = await axios.get('http://localhost:5000/api/v1/', {
         headers: {
-          "Authorization" : `Bearer ${token}`
+          "Authorization": `Bearer ${token}`
         },
       });
       setCalon(response.data.data);
@@ -29,9 +30,16 @@ export const Dashboard = () => {
     }
   }
 
+  console.log(calon);
+
   const deleteData = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/v1/delete/${id}`)
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:5000/api/v1/delete/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
       getCalon()
     } catch (error) {
       console.error(error)
@@ -64,33 +72,41 @@ export const Dashboard = () => {
           </Row>
           <Table hover responsive className='mt-3'>
             <thead>
-              <tr>
+              <tr className='text-center'>
                 <th>Nama Tim</th>
                 <th>Caketos</th>
+                <th>Kelas</th>
                 <th>Cawaketos</th>
+                <th>Kelas</th>
                 <th>Program kerja</th>
-                <th colSpan={3}>Aksi</th>
+                <th colSpan={2}>Foto</th>
+                <th colSpan={2}>Aksi</th>
               </tr>
             </thead>
             <tbody>
-              { calon.map((calon, index) => (
-              <tr key={index}>
-                <td>{calon.teamName}</td>
-                <td>{calon.leader.fullName}</td>
-                <td>{ calon.coLeader.fullName }</td>
-                <td>{ calon.proker }</td>
-                <td className='align-start'>
-                  <Button className='w-100'>Foto</Button>
-                </td>
-                <td className='align-start'>
-                  <Link to={`/edit/${calon.teamName}`} className='text-decoration-none text-reset'>
-                    <Button variant='warning' className='w-100'>Edit</Button>
-                  </Link>
-                </td>
-                <td className='align-start'>
-                  <Button variant='danger' className='w-100' onClick={() => deleteData(calon.id)}>Hapus</Button>
-                </td>
-              </tr>
+              {calon.map((calon, index) => (
+                <tr key={index} className='text-center'>
+                  <td>{calon.teamName}</td>
+                  <td>{calon.leader.fullName}</td>
+                  <td>{calon.leader.kelas}</td>
+                  <td>{calon.coLeader.fullName}</td>
+                  <td>{calon.coLeader.kelas}</td>
+                  <td>{calon.proker}</td>
+                  <td className='text-end pe-1'>
+                    <Image style={{ width: '100px' }} src={`http://localhost:5000/${calon.leaderPhoto}`} />
+                  </td>
+                  <td className='text-start ps-1'>
+                    <Image style={{ width: '100px' }} src={`http://localhost:5000/${calon.coLeaderPhoto}`} />
+                  </td>
+                  <td className='align-start'>
+                    <Link to={`/edit/${calon.teamName}`} className='text-decoration-none text-reset'>
+                      <Button variant='warning' className='w-100'>Edit</Button>
+                    </Link>
+                  </td>
+                  <td className='align-start'>
+                    <Button variant='danger' className='w-100' onClick={() => deleteData(calon.id)}>Hapus</Button>
+                  </td>
+                </tr>
               ))}
             </tbody>
           </Table>

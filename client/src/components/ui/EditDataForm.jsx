@@ -8,6 +8,7 @@ import axios from 'axios';
 
 export const EditDataForm = () => {
   const [id, setId] = useState('')
+  const [users, setUsers] = useState([])
   const [teamName, setTeamName] = useState('')
   const [leader, setLeader] = useState('')
   const [leaderEmail, setLeaderEmail] = useState('')
@@ -20,21 +21,24 @@ export const EditDataForm = () => {
   const { teamNameInit } = useParams();
 
   useEffect(() => {
-    getCalon()
+    getCalon();
+    getUsers();
   }, [])
-  
+
   const getCalon = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/v1/team/${teamNameInit}`);
       setTeamName(response.data.data.teamName);
       setLeader(response.data.data.leader.fullName);
+      setLeaderEmail(response.data.data.leader.email);
       setCoLeader(response.data.data.coLeader.fullName);
+      setCoLeaderEmail(response.data.data.coLeader.email);
       setProker(response.data.data.proker);
       setId(response.data.data.id)
     } catch (error) {
       console.error(error);
     }
-  }  
+  }
 
   const EditData = async (e) => {
     e.preventDefault();
@@ -44,14 +48,14 @@ export const EditDataForm = () => {
     formData.append("leaderPhoto", leaderPhoto);
     formData.append("coLeaderPhoto", coLeaderPhoto);
     formData.append("teamName", teamName);
-    formData.append("leader", leader);
-    formData.append("coLeader", coLeader);
+    formData.append("leaderEmail", leaderEmail);
+    formData.append("coLeaderEmail", coLeaderEmail);
     formData.append("proker", proker);
     try {
       await axios.patch(`http://localhost:5000/api/v1/update-casis/${id}`, formData, {
         headers: {
           "Content-type": "multipart/form-data",
-          "Authorization": `${token}`
+          "Authorization": `Bearer ${token}`
         },
       });
       navigate("/dashboard");
@@ -60,8 +64,22 @@ export const EditDataForm = () => {
     }
   };
 
+  const getUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/v1/user/get-users', {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
-    <Form onSubmit={ EditData }>
+    <Form onSubmit={EditData}>
       <Form.Control
         type="text"
         placeholder="Nama Tim"
@@ -79,13 +97,14 @@ export const EditDataForm = () => {
         />
       </Form.Group>
 
-      <Form.Control
-        type="text"
-        placeholder="Ketua"
-        className='mb-2 bg-white'
-        value={leader}
-        onChange={(e) => setLeader(e.target.value)}
-      />
+      <Form.Select className='mb-2 bg-white' onChange={(e) => setLeaderEmail(e.target.value)}>
+        <option>{leader}</option>
+        {users.map((user) => (
+          <option value={user.email} key={user.id}>
+            {user.fullName}
+          </option>
+        ))}
+      </Form.Select>
 
       <Form.Group className='mb-2'>
         <Form.Label className='mb-2 ms-1 text-start'>Wakil Ketua Osis</Form.Label>
@@ -96,13 +115,14 @@ export const EditDataForm = () => {
         />
       </Form.Group>
 
-      <Form.Control
-        type="text"
-        placeholder="Wakil Ketua"
-        className='mb-2 bg-white'
-        value={coLeader}
-        onChange={(e) => setCoLeader(e.target.value)}
-      />
+      <Form.Select className='mb-2 bg-white' onChange={(e) => setCoLeaderEmail(e.target.value)}>
+        <option>{coLeader}</option>
+        {users.map((user) => (
+          <option value={user.email} key={user.id}>
+            {user.fullName}
+          </option>
+        ))}
+      </Form.Select>
 
       <Form.Control
         as="textarea"
