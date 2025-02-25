@@ -6,7 +6,7 @@ export const checkUserRole = (allowedRoles) => {
     return async (req, res, next) => {
         const email = req.user.email;
 
-        if (!data) return res.status(401).send({ error: "Access denied. No token provided." });
+        if (!email) return res.status(401).send({ error: "Access denied. No token provided." });
 
         try {
             const user = await prisma.user.findUnique({
