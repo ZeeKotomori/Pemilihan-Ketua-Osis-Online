@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./routes/authRoute.js";
 import casisRoute from "./routes/casisRoute.js"
+import userRoute from "./routes/userRoute.js"
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1", casisRoute);
+app.use("/api/v1/user", userRoute);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
